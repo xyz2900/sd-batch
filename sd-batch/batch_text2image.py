@@ -12,7 +12,9 @@ from PIL import Image, PngImagePlugin
 yfiles = sys.argv[1:]
 argv = sys.argv[:1]
 sys.argv = argv
-argv_add = ['--api', '--nowebui', '--skip-torch-cuda-test', '--upcast-sampling', '--no-half-vae', '--use-cpu', 'interrogate']
+# --xformers --enable-insecure-extension-access --share --gradio-queue
+argv_add = ['--api', '--nowebui', '--xformers', '--enable-insecure-extension-access', '--share', '--gradio-queue']
+#argv_add = ['--api', '--nowebui', '--skip-torch-cuda-test', '--upcast-sampling', '--no-half-vae', '--use-cpu', 'interrogate']
 sys.argv.extend(argv_add)
 
 from modules import launch_utils
@@ -76,6 +78,7 @@ def batchProcess(*args):
       for model in sd_models:
          print(model)
 
+   st_time = time.time()
    for arg in args:
       ydata = load_yfile(arg)
       if ydata:
@@ -93,6 +96,7 @@ def batchProcess(*args):
          if response.status_code != 200:
             print(response.status_code, response.reason)
             os._exit(0)
+         print("MODEL LOADED: {}".format(model))
 
          #checkpoint = checkpoint_aliases.get(ydata['text2image'].get('sd_model'), None)
          #sd_models.load_model(checkpoint)
@@ -125,12 +129,13 @@ def batchProcess(*args):
                pnginfo.add_text("parameters", response2.json().get("info"))
 
                odir = f"{output_dir}/{iname}"
-               ofile = "{}/{}.png".format(odir, dt.datetime.now().strftime("%Y%m%d%H%M%S"))
+               ofile = "{}/{}.png".format(odir, dt.datetime.now().strftime("%Y%m%d%H%M%S%f"))
                print(ofile)
                os.makedirs(odir, exist_ok=True)
                oimage.save(ofile, pnginfo=pnginfo)
 
-   print("batchProcess: finish")
+   en_time = time.time()
+   print("batchProcess: finish total={}sec".format(en_time - st_time))
    os._exit(0)
    return 1
 

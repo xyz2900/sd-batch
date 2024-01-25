@@ -1,55 +1,20 @@
 text2image:
   name: 'test01'
   output_dir: './outputs'
-  sd_model: 'beautifulRealistic_brav5.safetensors'
+  sd_model: 'beautifulRealistic_v60.safetensors [bc2f30f4ad]'
   prompt: '(realistic, photo-realistic:1.37), (masterpiece), (best quality:1.4), (ultra high res:1.2), (RAW photo:1.2), (sharp focus:1.3), (full body:1.2), elegant, 1girl, 16k, highly detail face, (shine hair:1.3), BREAK,
 (huge breasts:1.3), (bustier,garter straps:1.2), scenery, shiny skin, Japanese idle, glamorous, beautiful detailed eyes, looking at viewer, cute, makeup'
   negative_prompt: 'EasyNegativeV2, (text:2), (worst quality:2),(low quality:2),(normal quality:2),(deformed:1.3),(monochrome:1.2),(grayscale:1.2), ugly face, (missing fingers), extra fingers, (six fingers:1.2), (bad anatomy:1.2), skin spots acnes, skin blemishes, age spot, cartoon, nipple'
-  width: 128
-  height: 128
-  styles: ['']
-  seed: -1
-  subseed: -1
-  subseed_strength: 0
-  seed_resize_from_h: -1
-  seed_resize_from_w: -1
-  sampler_name: 'DPM++ 2M Karras'
-  batch_size: 1
-  n_iter: 1
-  steps: 20
-  cfg_scale: 7
-  restore_faces: True
-  tiling: True
-  do_not_save_samples: False
-  do_not_save_grid: False
-  eta: 0
-  denoising_strength: 0.7
-  s_min_uncond: 0
-  s_churn: 0
-  s_tmax: 0
-  s_tmin: 0
-  s_noise: 0
-  override_settings: {}
-  override_settings_restore_afterwards: True
-  refiner_checkpoint: ""
-  refiner_switch_at: 0
-  disable_extra_networks: False
-  comments: {}
-  enable_hr: False
-  firstphase_width: 0
-  firstphase_height: 0
+  batch_size: 10
+  width: 400
+  height: 640
+  sampler_name: "DPM++ 2M Karras"
+  enable_hr: True
   hr_scale: 2
   hr_upscaler: "Latent"
-  hr_second_pass_steps: 0
-  hr_resize_x: 0
-  hr_resize_y: 0
-  hr_checkpoint_name: "Use same checkpoint"
-  hr_sampler_name: "Use same sampler"
-  hr_prompt: ""
-  hr_negative_prompt: ""
-  sampler_index: "Euler"
-  script_name: ""
-  script_args: []
-  send_images: True
-  save_images: False
-  alwayson_scripts: {}
+  denoising_strength: 0.7
+  hr_checkpoint_name: "SwinlR4×"
+
+
+
+
