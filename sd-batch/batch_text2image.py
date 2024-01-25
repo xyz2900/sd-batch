@@ -126,6 +126,7 @@ def batchProcess(*args):
 
                odir = f"{output_dir}/{iname}"
                ofile = "{}/{}.png".format(odir, dt.datetime.now().strftime("%Y%m%d%H%M%S"))
+               print(ofile)
                os.makedirs(odir, exist_ok=True)
                oimage.save(ofile, pnginfo=pnginfo)
 
