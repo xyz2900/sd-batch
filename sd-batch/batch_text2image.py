@@ -55,9 +55,17 @@ def batchProcess(*args):
    print("batchProcess:{}".format(args))
    time.sleep(60)
 
-   from modules import sd_models
-   sd_models.list_models()
-   checkpoint_aliases = sd_models.checkpoint_aliases
+   #from modules import sd_models
+   #sd_models.list_models()
+   # checkpoint_aliases = sd_models.checkpoint_aliases
+   url = 'http://127.0.0.1:7861'
+   # モデル一覧
+   responce = requests.get(f"{url}/sdapi/v1/sd-models")
+   if responce.status_code == 200:
+      sd_models = responce.json()
+      sd_models = [model["title"] for model in sd_models]
+      for model in sd_models:
+         print(model)
 
    for arg in args:
       ydata = load_yfile(arg)
@@ -65,12 +73,27 @@ def batchProcess(*args):
          iname = ydata['text2image'].get('name', 'other') # nameが設定されていない場合はotherにする
          output_dir = ydata['text2image'].get('output_dir', './outputs')
 
-         checkpoint = checkpoint_aliases.get(ydata['text2image'].get('sd_model'), None)
-         sd_models.load_model(checkpoint)
+         # モデル変更
+         #model = "AnythingV5Ink_v5PrtRE.safetensors [7f96a1a9ac]"
+         model = ydata['text2image'].get('sd_model')
+         option_payload = {
+            "sd_model_checkpoint": model,
+            # "CLIP_stop_at_last_layers": 2
+         }
+         response = requests.post(url=f'{url}/sdapi/v1/options', json=option_payload)
+         if response.status_code != 200:
+            print(response.status_code, response.reason)
+            os._exit(0)
+
+         #checkpoint = checkpoint_aliases.get(ydata['text2image'].get('sd_model'), None)
+         #sd_models.load_model(checkpoint)
+
          jdata = ydata['text2image']
-         url = 'http://127.0.0.1:7861'
+         jdata = jdata.pop('name')
+         jdata = jdata.pop('sd_model')
+         jdata = jdata.pop('output_dir')
          response = requests.post(url=f'{url}/sdapi/v1/txt2img', json=jdata)
-         print(response.status_code, response.text)
+         print(response.status_code)
          if response.status_code == 200:
             rdata = response.json()
             simages = rdata['images']
