@@ -54,7 +54,7 @@ def load_yfile(fname):
 def batchProcess(*args):
    url = 'http://127.0.0.1:7861'
    print("batchProcess:{}".format(args))
-   time.sleep(60)
+   time.sleep(20)
    # API接続完了待ち
    # モデル一覧
    while(1):
@@ -98,10 +98,17 @@ def batchProcess(*args):
          #sd_models.load_model(checkpoint)
 
          # txt2img
+         # パラメータ設定
          jdata = ydata['text2image']
          jdata.pop('name')
          jdata.pop('sd_model')
          jdata.pop('output_dir')
+         if jdata.get('enable_hr') == True:
+            if jdata.get('hr_checkpoint_name') == None:
+               jdata['hr_checkpoint_name'] = jdata.get('sd_model')
+            if jdata.get('hr_sampler_name') == None:
+               jdata['hr_sampler_name'] = jdata.get('sampler_name')
+
          response = requests.post(url=f'{url}/sdapi/v1/txt2img', json=jdata)
          print(response.status_code)
          if response.status_code == 200:
