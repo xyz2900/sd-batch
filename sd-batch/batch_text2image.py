@@ -63,6 +63,8 @@ def batchProcess(*args):
       ydata = load_yfile(arg)
       if ydata:
          iname = ydata['text2image'].get('name', 'other') # nameが設定されていない場合はotherにする
+         output_dir = ydata['text2image'].get('output_dir', './outputs')
+
          checkpoint = checkpoint_aliases.get(ydata['text2image'].get('sd_model'), None)
          sd_models.load_model(checkpoint)
          jdata = ydata['text2image']
@@ -82,7 +84,7 @@ def batchProcess(*args):
                pnginfo = PngImagePlugin.PngInfo()
                pnginfo.add_text("parameters", response2.json().get("info"))
 
-               odir = f"./outputs/{iname}"
+               odir = f"{output_dir}/{iname}"
                ofile = "{}/{}.png".format(odir, dt.datetime.now().strftime("%Y%m%d%H%M%S"))
                os.makedirs(odir, exist_ok=True)
                oimage.save(ofile, pnginfo=pnginfo)
