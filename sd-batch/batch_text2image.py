@@ -52,15 +52,24 @@ def load_yfile(fname):
    return yml
 
 def batchProcess(*args):
+   url = 'http://127.0.0.1:7861'
    print("batchProcess:{}".format(args))
    time.sleep(60)
+   # API接続完了待ち
+   # モデル一覧
+   while(1):
+      responce = requests.get(f"{url}/sdapi/v1/sd-models")
+      if responce.status_code == 200:
+         print("waiting ... {}".format(responce.status_code))
+         break
+
+      time.sleep(10)
+   print("START PROCESS ...")
 
    #from modules import sd_models
    #sd_models.list_models()
    # checkpoint_aliases = sd_models.checkpoint_aliases
-   url = 'http://127.0.0.1:7861'
    # モデル一覧
-   responce = requests.get(f"{url}/sdapi/v1/sd-models")
    if responce.status_code == 200:
       sd_models = responce.json()
       sd_models = [model["title"] for model in sd_models]
@@ -88,10 +97,11 @@ def batchProcess(*args):
          #checkpoint = checkpoint_aliases.get(ydata['text2image'].get('sd_model'), None)
          #sd_models.load_model(checkpoint)
 
+         # txt2img
          jdata = ydata['text2image']
-         jdata = jdata.pop('name')
-         jdata = jdata.pop('sd_model')
-         jdata = jdata.pop('output_dir')
+         jdata.pop('name')
+         jdata.pop('sd_model')
+         jdata.pop('output_dir')
          response = requests.post(url=f'{url}/sdapi/v1/txt2img', json=jdata)
          print(response.status_code)
          if response.status_code == 200:
