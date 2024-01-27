@@ -1,7 +1,7 @@
 text2image:
-  name: 'test02'
+  name: 'test01'
   output_dir: './outputs'
-  sd_model: 'yayoiMix_v25.safetensors [ca28aa4a44]'
+  sd_model: ['beautifulRealistic_v60.safetensors [bc2f30f4ad]', 'beautifulRealistic_v7.safetensors', 'beautifulRealistic_brav5.safetensors']
   prompt: 'beautiful girl'
   negative_prompt: 'EasyNegativeV2'
   batch_count: 100
@@ -11,12 +11,10 @@ text2image:
   cfg_scale: 7
   sampler_name: "DPM++ 2M Karras"
   steps: 20
-  enable_hr: True
+  enable_hr: False
   hr_scale: 2
   #hr_upscaler: "SwinIR 4x"
   hr_upscaler: "Latent"
   hr_second_pass_steps: 0
   denoising_strength: 0.7
-
-
 

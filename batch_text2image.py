@@ -53,6 +53,11 @@ def load_yfile(fname):
 
    return yml
 
+def dict_del(d, key):
+   if key in d:
+      del d[key]
+   return d
+
 def batchProcess(*args):
    url = 'http://127.0.0.1:7861'
    print("batchProcess:{}".format(args))
@@ -60,10 +65,13 @@ def batchProcess(*args):
    # API接続完了待ち
    # モデル一覧
    while(1):
-      responce = requests.get(f"{url}/sdapi/v1/sd-models")
-      if responce.status_code == 200:
-         print("waiting ... {}".format(responce.status_code))
-         break
+      try:
+         responce = requests.get(f"{url}/sdapi/v1/sd-models")
+         if responce.status_code == 200:
+            print("waiting ... {}".format(responce.status_code))
+            break
+      except Exception as e:
+         print(e)
 
       time.sleep(10)
    print("START PROCESS ...")
@@ -87,52 +95,60 @@ def batchProcess(*args):
 
          # モデル変更
          #model = "AnythingV5Ink_v5PrtRE.safetensors [7f96a1a9ac]"
-         model = ydata['text2image'].get('sd_model')
-         option_payload = {
-            "sd_model_checkpoint": model,
-            # "CLIP_stop_at_last_layers": 2
-         }
-         response = requests.post(url=f'{url}/sdapi/v1/options', json=option_payload)
-         if response.status_code != 200:
-            print(response.status_code, response.reason)
-            os._exit(0)
-         print("MODEL LOADED: {}".format(model))
+         models = ydata['text2image'].get('sd_model')
+         if isinstance(models, list) == False:
+            models = [models]
 
-         #checkpoint = checkpoint_aliases.get(ydata['text2image'].get('sd_model'), None)
-         #sd_models.load_model(checkpoint)
+         batch_count = ydata['text2image'].get('batch_count', 1)
+         for model in models:
+            model_name = model.split('.')[0]
+            option_payload = {
+               "sd_model_checkpoint": model,
+               # "CLIP_stop_at_last_layers": 2
+            }
+            response = requests.post(url=f'{url}/sdapi/v1/options', json=option_payload)
+            if response.status_code != 200:
+               print(response.status_code, response.reason)
+               os._exit(0)
+            print("MODEL LOADED: {} [{}]".format(model, model_name))
 
-         # txt2img
-         # パラメータ設定
-         jdata = ydata['text2image']
-         jdata.pop('name')
-         jdata.pop('sd_model')
-         jdata.pop('output_dir')
-         if jdata.get('enable_hr') == True:
-            if jdata.get('hr_checkpoint_name') == None:
-               jdata['hr_checkpoint_name'] = jdata.get('sd_model')
-            if jdata.get('hr_sampler_name') == None:
-               jdata['hr_sampler_name'] = jdata.get('sampler_name')
+            #checkpoint = checkpoint_aliases.get(ydata['text2image'].get('sd_model'), None)
+            #sd_models.load_model(checkpoint)
 
-         response = requests.post(url=f'{url}/sdapi/v1/txt2img', json=jdata)
-         print(response.status_code)
-         if response.status_code == 200:
-            rdata = response.json()
-            simages = rdata['images']
-            for simage in simages:
-               oimage = Image.open(io.BytesIO(base64.b64decode(simage.split(",", 1)[0])))
+            # txt2img
+            # パラメータ設定
+            jdata = ydata['text2image']
+            dict_del(jdata, 'name')
+            dict_del(jdata, 'sd_model')
+            dict_del(jdata, 'output_dir')
+            dict_del(jdata, 'batch_count')
+            if jdata.get('enable_hr') == True:
+               if jdata.get('hr_checkpoint_name') == None:
+                  jdata['hr_checkpoint_name'] = jdata.get('sd_model')
+               if jdata.get('hr_sampler_name') == None:
+                  jdata['hr_sampler_name'] = jdata.get('sampler_name')
 
-               png_payload = {
-                  "image": "data:image/png;base64," + simage
-               }
-               response2 = requests.post(url=f'{url}/sdapi/v1/png-info', json=png_payload)
-               pnginfo = PngImagePlugin.PngInfo()
-               pnginfo.add_text("parameters", response2.json().get("info"))
+            for batch_no in range(batch_count):
+               response = requests.post(url=f'{url}/sdapi/v1/txt2img', json=jdata)
+               print(response.status_code)
+               if response.status_code == 200:
+                  rdata = response.json()
+                  simages = rdata['images']
+                  for simage in simages:
+                     oimage = Image.open(io.BytesIO(base64.b64decode(simage.split(",", 1)[0])))
 
-               odir = f"{output_dir}/{iname}"
-               ofile = "{}/{}.png".format(odir, dt.datetime.now().strftime("%Y%m%d%H%M%S%f"))
-               print(ofile)
-               os.makedirs(odir, exist_ok=True)
-               oimage.save(ofile, pnginfo=pnginfo)
+                     png_payload = {
+                        "image": "data:image/png;base64," + simage
+                     }
+                     response2 = requests.post(url=f'{url}/sdapi/v1/png-info', json=png_payload)
+                     pnginfo = PngImagePlugin.PngInfo()
+                     pnginfo.add_text("parameters", response2.json().get("info"))
+
+                     odir = f"{output_dir}/{iname}/{model_name}"
+                     ofile = "{}/{}.png".format(odir, dt.datetime.now().strftime("%Y%m%d%H%M%S%f"))
+                     print("{}/{} {}".format(batch_no + 1, batch_count, ofile))
+                     os.makedirs(odir, exist_ok=True)
+                     oimage.save(ofile, pnginfo=pnginfo)
 
    en_time = time.time()
    print("batchProcess: finish total={}sec".format(en_time - st_time))

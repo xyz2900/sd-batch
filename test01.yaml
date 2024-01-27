@@ -2,7 +2,7 @@ text2image:
   name: 'test01'
   output_dir: './outputs'
   sd_model: 'beautifulRealistic_v60.safetensors [bc2f30f4ad]'
-  prompt: 'girl'
+  prompt: 'beautiful girl'
   negative_prompt: 'nsfw'
   batch_count: 10
   batch_size: 1

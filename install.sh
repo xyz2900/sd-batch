@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh  
 apt -y install python3.10
 apt -y install libpython3.10-dev
 apt -y install build-essential
