@@ -1,5 +1,5 @@
 text2image:
-  name: 'test01'
+  name: 'test03'
   output_dir: './outputs'
   sd_model: ['beautifulRealistic_v60.safetensors [bc2f30f4ad]', 'beautifulRealistic_v7.safetensors', 'beautifulRealistic_brav5.safetensors']
   prompt: 'beautiful girl'
